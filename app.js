@@ -1,85 +1,104 @@
-// Importar la librería de SendGrid
+// Importar librerías necesarias
+const express = require('express');
+const bodyParser = require('body-parser');
 const sgMail = require('@sendgrid/mail');
 
-// Importar dotenv para cargar las variables de entorno
+// Cargar variables de entorno
 require('dotenv').config();
 
-// Configurar la clave API de SendGrid desde la variable de entorno
+// Configurar la clave API de SendGrid
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const sender = '180522@iberopuebla.mx'
+// Configuración del servidor Express
+const app = express();
+const port = process.env.SENDGRID_PORT || 3888;
+app.use(bodyParser.json()); // Para parsing de application/json
 
-// Función para enviar un código de verificación
-function sendVerificacion(email, codigo, index_url) {
+// Definir el sender
+const sender = '180522@iberopuebla.mx';
+
+// Endpoint para enviar código de verificación
+app.post('/sendVerification', (req, res) => {
+  const { email, codigo, index_url } = req.body;
   const msg = {
     to: email,
-    from: sender, // Debe ser una dirección verificada en SendGrid
-    templateId: 'd-7af7ec957cc648f5a3af2ffa73fcccbf', 
+    from: sender,
+    templateId: 'd-7af7ec957cc648f5a3af2ffa73fcccbf',
     dynamicTemplateData: {
       codigo_verificacion: codigo,
       url: index_url
-    } 
-    };
-
-  sgMail
-    .send(msg)
-    .then(() => console.log('Código de verificación enviado'))
-    .catch(error => console.error(error.toString()));
-}
-
-// Función para enviar un link de cambio de contraseña
-function sendCambioContrasena(email, nombreUsuario, link) {
-  const msg = {
-    to: email,
-    from: sender, 
-    templateId: 'd-78f6e56f07064a48b15a0a53700c6f71',
-    dynamicTemplateData:{
-        nombre_usuario: nombreUsuario,
-        url: link
     }
   };
 
   sgMail
     .send(msg)
-    .then(() => console.log('Email para cambio de contraseña enviado'))
-    .catch(error => console.error(error.toString()));
-}
+    .then(() => res.status(200).send('Código de verificación enviado'))
+    .catch(error => res.status(500).send(error.toString()));
+});
 
-// Función para enviar confirmación de creación de cuenta
-function sendConfirmacionUsuario(email, nombreUsuario, index_url) {
-    const msg = {
-      to: email,
-      from: sender, 
-      templateId: 'd-d4e094e625874b6abcae49ae342b4f4b',
-      dynamicTemplateData:{
-          nombre_usuario: nombreUsuario,
-          url: index_url
-      }
-    };
-  
-    sgMail
-      .send(msg)
-      .then(() => console.log('Confirmación de creación de cuenta enviada'))
-      .catch(error => console.error(error.toString()));
-  }
-
-  function sendConfirmacionOrden(email, nombreUsuario, idOrden, index_url) {
-    const msg = {
-      to: email,
-      from: sender, // Debe ser una dirección verificada en SendGrid
-      templateId: 'd-ede4b8f64d4a4e27b59502c7e13c640d', 
-      dynamicTemplateData: {
-        nombre_usuario: nombreUsuario,
-        id_orden: idOrden,
-        url: index_url
-      },
-    };
-  
-    sgMail
-      .send(msg)
-      .then(() => console.log('Confirmación de orden enviada'))
-      .catch(error => console.error(error.toString()));
+// Endpoint para enviar link de cambio de contraseña
+app.post('/sendPasswordChange', (req, res) => {
+  const { email, nombreUsuario, link } = req.body;
+  const msg = {
+    to: email,
+    from: sender,
+    templateId: 'd-78f6e56f07064a48b15a0a53700c6f71',
+    dynamicTemplateData: {
+      nombre_usuario: nombreUsuario,
+      url: link
     }
+  };
+
+  sgMail
+    .send(msg)
+    .then(() => res.status(200).send('Email para cambio de contraseña enviado'))
+    .catch(error => res.status(500).send(error.toString()));
+});
+
+// Endpoint para enviar confirmación de creación de cuenta
+app.post('/sendAccountConfirmation', (req, res) => {
+  const { email, nombreUsuario, index_url } = req.body;
+  const msg = {
+    to: email,
+    from: sender,
+    templateId: 'd-d4e094e625874b6abcae49ae342b4f4b',
+    dynamicTemplateData: {
+      nombre_usuario: nombreUsuario,
+      url: index_url
+    }
+  };
+
+  sgMail
+    .send(msg)
+    .then(() => res.status(200).send('Confirmación de creación de cuenta enviada'))
+    .catch(error => res.status(500).send(error.toString()));
+});
+
+// Endpoint para enviar confirmación de orden
+app.post('/sendOrderConfirmation', (req, res) => {
+  const { email, nombreUsuario, idOrden, index_url } = req.body;
+  const msg = {
+    to: email,
+    from: sender,
+    templateId: 'd-ede4b8f64d4a4e27b59502c7e13c640d',
+    dynamicTemplateData: {
+      nombre_usuario: nombreUsuario,
+      id_orden: idOrden,
+      url: index_url
+    }
+  };
+
+  sgMail
+    .send(msg)
+    .then(() => res.status(200).send('Confirmación de orden enviada'))
+    .catch(error => res.status(500).send(error.toString()));
+});
+
+// Iniciar el servidor
+app.listen(port, () => {
+  console.log(`Servidor corriendo en http://localhost:${port}`);
+});
+
 // Ejemplo de uso: 
     // sendVerificacion('sistemasdist2024@gmail.com')
-sendConfirmacionOrden('sistemasdist2024@gmail.com', 'Perrito', '12345')
+// sendConfirmacionOrden('sistemasdist2024@gmail.com', 'Perrito', '12345')
