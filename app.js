@@ -32,7 +32,7 @@ app.post('/sendVerification', (req, res) => {
 
   sgMail
     .send(msg)
-    .then(() => res.status(200).send('Código de verificación enviado'))
+    .then(() => res.status(200).send({message: 'Código de verificación enviado'}))
     .catch(error => res.status(500).send(error.toString()));
 });
 
@@ -51,7 +51,7 @@ app.post('/sendPasswordChange', (req, res) => {
 
   sgMail
     .send(msg)
-    .then(() => res.status(200).send('Email para cambio de contraseña enviado'))
+    .then(() => res.status(200).send({message: 'Email para cambio de contraseña enviado'}))
     .catch(error => res.status(500).send(error.toString()));
 });
 
@@ -70,7 +70,7 @@ app.post('/sendAccountConfirmation', (req, res) => {
 
   sgMail
     .send(msg)
-    .then(() => res.status(200).send('Confirmación de creación de cuenta enviada'))
+    .then(() => res.status(200).send({message: 'Confirmación de creación de cuenta enviada'}))
     .catch(error => res.status(500).send(error.toString()));
 });
 
@@ -90,7 +90,7 @@ app.post('/sendOrderConfirmation', (req, res) => {
 
   sgMail
     .send(msg)
-    .then(() => res.status(200).send('Confirmación de orden enviada'))
+    .then(() => res.status(200).send({message: 'Confirmación de orden enviada'}))
     .catch(error => res.status(500).send(error.toString()));
 });
 
